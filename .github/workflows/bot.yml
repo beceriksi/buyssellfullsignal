@@ -1,0 +1,43 @@
+name: mexc-pro-signals
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # her 15 dakikada
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install ccxt pandas numpy requests
+
+      - name: Run bot
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID:        ${{ secrets.CHAT_ID }}
+          # İsteğe göre ayarlar:
+          SCAN_LIMIT: "300"
+          TF_LIST: "1h,4h"
+          BUY_MIN_TURNOVER: "10000"
+          BUY_VOL_RATIO_MIN: "1.10"
+          BUY_RSI_MIN: "50.0"
+          BUY_ADX_MIN: "16.0"
+          SELL_RSI_MAX: "48.0"
+          SELL_ADX_MIN: "18.0"
+          GAP_PCT_MAX: "0.10"
+          MAX_WORKERS: "12"
+        run: |
+          python main.py
